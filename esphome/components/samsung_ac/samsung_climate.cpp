@@ -101,6 +101,8 @@ void SamsungClimateUart::getInitData() {
 }
 
 void SamsungClimateUart::setup() {
+
+    this->set_supported_custom_fan_modes({CUSTOM_FAN_LEVEL_TURBO});
     // load initial sensor data from the unit
     this->getInitData();
 }
@@ -467,7 +469,7 @@ void SamsungClimateUart::control(const climate::ClimateCall &call) {
         auto payload = StringToFanLevel(fan_mode);
         if (payload.has_value()) {
             ESP_LOGW(TAG, "Setting custom fan mode to %s [%02x]", fan_mode.c_str(), payload.value());
-            this->set_custom_fan_mode_(fan_mode);
+            this->set_custom_fan_mode_(fan_mode.c_str());
             this->sendCmd(
                 0x1204,
                 std::vector<std::pair<uint8_t, std::vector<uint8_t>>>{
