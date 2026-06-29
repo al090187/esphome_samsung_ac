@@ -20,7 +20,7 @@ from esphome.const import (
 )
 
 DEPENDENCIES = ["uart"]
-AUTO_LOAD = ["sensor", "select"]
+AUTO_LOAD = ["sensor", "select", "button"]
 
 CONF_ROOM_TEMP = "room_temp"
 CONF_OUTDOOR_TEMP = "outdoor_temp"
