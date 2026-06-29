@@ -224,7 +224,7 @@ void SamsungClimateUart::parseResponse(const SamsungProto &command) {
                         if (static_cast<FAN>(reg.value[0]) == FAN::TURBO) {
                             auto fanMode = IntToCustomFanMode(static_cast<FAN>(reg.value[0]));
                             ESP_LOGD(TAG, "Received custom fan mode: [%02x] %s", reg.value[0], fanMode.c_str());
-                            this->set_custom_fan_mode_(fanMode);
+                            this->set_custom_fan_mode_(fanMode.c_str());
                         } else {
                             auto fanMode = IntToClimateFanMode(static_cast<FAN>(reg.value[0]));
                             ESP_LOGD(TAG, "Received fan mode: [%02x] %s", reg.value[0], climate_fan_mode_to_string(fanMode));
@@ -462,13 +462,18 @@ void SamsungClimateUart::control(const climate::ClimateCall &call) {
         this->sendCmd(0x1204, {{0x62, {mode}}});
     }
 
-    if (call.get_custom_fan_mode().has_value()) {
-        auto fan_mode = *call.get_custom_fan_mode();
+    if (call.has_custom_fan_mode()) {
+        auto fan_mode = std::string(call.get_custom_fan_mode().c_str());
         auto payload = StringToFanLevel(fan_mode);
         if (payload.has_value()) {
             ESP_LOGW(TAG, "Setting custom fan mode to %s [%02x]", fan_mode.c_str(), payload.value());
             this->set_custom_fan_mode_(fan_mode);
-            this->sendCmd(0x1204, {{0x62, {static_cast<uint8_t>(payload.value())}}});
+            this->sendCmd(
+                0x1204,
+                std::vector<std::pair<uint8_t, std::vector<uint8_t>>>{
+                    {0x62, std::vector<uint8_t>{static_cast<uint8_t>(payload.value())}}
+                }
+            );
         }
     }
 
@@ -493,14 +498,14 @@ ClimateTraits SamsungClimateUart::traits() {
     } else {
         traits.set_supported_swing_modes({climate::CLIMATE_SWING_OFF, climate::CLIMATE_SWING_VERTICAL});
     }
-    traits.set_supports_current_temperature(true);
+    //traits.set_supports_current_temperature(true);
 
     traits.add_supported_fan_mode(CLIMATE_FAN_AUTO);
     traits.add_supported_fan_mode(CLIMATE_FAN_LOW);
     traits.add_supported_fan_mode(CLIMATE_FAN_MEDIUM);
     traits.add_supported_fan_mode(CLIMATE_FAN_HIGH);
     // Samsung AC has more FAN levels that standard climate component, we have to use custom.
-    traits.add_supported_custom_fan_mode(CUSTOM_FAN_LEVEL_TURBO);
+    //traits.add_supported_custom_fan_mode(CUSTOM_FAN_LEVEL_TURBO);
 
     traits.set_visual_temperature_step(1);
     traits.set_visual_min_temperature(this->min_temp_);
