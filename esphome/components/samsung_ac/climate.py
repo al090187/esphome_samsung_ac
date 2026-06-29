@@ -49,9 +49,9 @@ SamsungClimateUart = samsung_ns.class_("SamsungClimateUart", cg.PollingComponent
 SamsungCoModeSelect = samsung_ns.class_('SamsungCoModeSelect', select.Select)
 ResetUsedPowerButton = samsung_ns.class_("ResetUsedPowerButton", button.Button, cg.Component)
 
-CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
+CONFIG_SCHEMA = climate.climate_schema(SamsungClimateUart).extend(
     {
-        cv.GenerateID(): cv.declare_id(SamsungClimateUart),
+     #   cv.GenerateID(): cv.declare_id(SamsungClimateUart),
         cv.Optional(CONF_OUTDOOR_TEMP): sensor.sensor_schema(
                 unit_of_measurement=UNIT_CELSIUS,
                 accuracy_decimals=0,
@@ -103,9 +103,8 @@ CONFIG_SCHEMA = climate.CLIMATE_SCHEMA.extend(
 
 
 async def to_code(config):
-    var = cg.new_Pvariable(config[CONF_ID])
+    var = await climate.new_climate(config)
     await cg.register_component(var, config)
-    await climate.register_climate(var, config)
     await uart.register_uart_device(var, config)
 
     if CONF_OUTDOOR_TEMP in config:
