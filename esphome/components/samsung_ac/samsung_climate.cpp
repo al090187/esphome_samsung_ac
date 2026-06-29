@@ -102,7 +102,7 @@ void SamsungClimateUart::getInitData() {
 
 void SamsungClimateUart::setup() {
 
-    this->set_supported_custom_fan_modes({CUSTOM_FAN_LEVEL_TURBO});
+    this->set_supported_custom_fan_modes({"Turbo"});
     // load initial sensor data from the unit
     this->getInitData();
 }
