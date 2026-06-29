@@ -94,9 +94,20 @@ CONFIG_SCHEMA = climate.climate_schema(SamsungClimateUart).extend(
                 entity_category=ENTITY_CATEGORY_CONFIG,
             ),
 
-        cv.Optional(CONF_CO_MODE): select.SELECT_SCHEMA.extend({
-            cv.GenerateID(): cv.declare_id(SamsungCoModeSelect),
-            cv.Required(CONF_CO_MODE_MODES): cv.ensure_list(cv.one_of("Off","TurboMode","Smart","Sleep","Quiet","SoftCool", "WindMode1","WindMode2","WindMode3"))
+        cv.Optional(CONF_CO_MODE): select.select_schema(SamsungCoModeSelect).extend({
+            cv.Required(CONF_CO_MODE_MODES): cv.ensure_list(
+                cv.one_of(
+                    "Off",
+                    "TurboMode",
+                    "Smart",
+                    "Sleep",
+                    "Quiet",
+                    "SoftCool",
+                    "WindMode1",
+                    "WindMode2",
+                    "WindMode3",
+                )
+            )
         }),
     }
 ).extend(uart.UART_DEVICE_SCHEMA).extend(cv.polling_component_schema("120s"))
